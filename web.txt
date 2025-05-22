@@ -1,0 +1,151 @@
+import React, { useState, useEffect } from "react";
+
+const translations = {
+  zh: {
+    title: "GBTC 资讯",
+    welcome: "欢迎了解Galaxy BitCoin (GBTC)",
+    description: "实时查看GBTC价格、溢价率与市场表现。",
+    startNow: "立即了解",
+    popularCoins: "GBTC 基础数据",
+    features: "为何关注 GBTC",
+    feature1: "机构投资通道",
+    feature1desc: "GBTC 为传统投资者提供接触比特币的途径。",
+    feature2: "实时市场表现",
+    feature2desc: "追踪 GBTC 价格与比特币现货价格的差异。",
+    feature3: "合规交易",
+    feature3desc: "通过 OTC 市场合规交易，适合机构持仓。",
+    home: "首页",
+    market: "市场",
+    wallet: "资产",
+    login: "登录",
+    copyright: "保留所有权利",
+    gbtcPrice: "GBTC 当前价格",
+    btcPrice: "比特币现货价格",
+    premium: "溢价/折价率"
+  },
+  en: {
+    title: "GBTC Info",
+    welcome: "Welcome to Galaxy BitCoin Trust (GBTC) Overview",
+    description: "Track GBTC price, premium rate, and market trends in real-time.",
+    startNow: "Learn More",
+    popularCoins: "GBTC Basic Data",
+    features: "Why GBTC Matters",
+    feature1: "Institutional Access",
+    feature1desc: "GBTC allows traditional investors to gain exposure to Bitcoin.",
+    feature2: "Real-Time Market Metrics",
+    feature2desc: "Track GBTC pricing and compare with Bitcoin spot prices.",
+    feature3: "Regulated Access",
+    feature3desc: "Traded on OTC markets, GBTC suits institutional needs.",
+    home: "Home",
+    market: "Market",
+    wallet: "Assets",
+    login: "Login",
+    copyright: "All rights reserved",
+    gbtcPrice: "GBTC Price",
+    btcPrice: "Bitcoin Price",
+    premium: "Premium/Discount"
+  }
+};
+
+export default function GBTCPage() {
+  const [lang, setLang] = useState("en");
+  const [btcPrice, setBtcPrice] = useState("...");
+  const t = translations[lang];
+
+  useEffect(() => {
+    const mockPrice = "$67,000";
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+    fetch("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd", {
+      signal: controller.signal
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("Network response was not ok");
+        return res.json();
+      })
+      .then((data) => {
+        const price = data?.bitcoin?.usd;
+        if (typeof price !== "number") throw new Error("Price is not a number");
+        setBtcPrice(`$${price.toLocaleString()}`);
+      })
+      .catch((err) => {
+        console.warn("Using fallback BTC price due to error:", err);
+        setBtcPrice(mockPrice);
+      })
+      .finally(() => clearTimeout(timeoutId));
+  }, []);
+
+  return (
+    <div className="min-h-screen bg-[#0D1117] text-white font-sans">
+      <header className="flex flex-wrap justify-between items-center px-4 md:px-6 py-4 bg-[#161B22] shadow-md">
+        <div className="flex items-center space-x-4">
+          <img src="/logo.png" alt="GBTC Logo" className="h-10 w-10" />
+          <h1 className="text-xl md:text-2xl font-bold text-[#F9D342]">{t.title}</h1>
+        </div>
+        <nav className="flex-1 flex justify-center md:justify-end space-x-4 md:space-x-6 mt-4 md:mt-0">
+          <a href="#" className="hover:text-[#F9D342] text-sm md:text-base">{t.home}</a>
+          <a href="#" className="hover:text-[#F9D342] text-sm md:text-base">{t.market}</a>
+          <a href="#" className="hover:text-[#F9D342] text-sm md:text-base">{t.wallet}</a>
+          <a href="#" className="hover:text-[#F9D342] text-sm md:text-base">{t.login}</a>
+          <select
+            value={lang}
+            onChange={(e) => setLang(e.target.value)}
+            className="bg-[#21262D] text-white rounded px-2 py-1 text-sm"
+          >
+            <option value="en">English</option>
+            <option value="zh">中文</option>
+          </select>
+        </nav>
+      </header>
+
+      <section className="text-center py-16 md:py-20 bg-gradient-to-r from-[#F9D342] to-[#FA7D09] text-gray-900">
+        <h2 className="text-3xl md:text-4xl font-extrabold mb-4 px-2">{t.welcome}</h2>
+        <p className="text-base md:text-lg mb-6 px-4 md:px-0">{t.description}</p>
+        <button className="bg-white text-gray-900 font-semibold px-6 py-2 rounded-full hover:bg-gray-200 transition">{t.startNow}</button>
+      </section>
+
+      <section className="px-4 md:px-6 py-12">
+        <h3 className="text-2xl font-bold mb-6 text-[#F9D342]">{t.popularCoins}</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+          {[
+            { name: t.gbtcPrice, value: "$38.50" },
+            { name: t.btcPrice, value: btcPrice },
+            { name: t.premium, value: "-12.4%" },
+          ].map((item, index) => (
+            <div key={index} className="bg-[#161B22] rounded-xl p-4 shadow hover:shadow-lg transition text-center">
+              <h4 className="text-lg md:text-xl font-semibold mb-2 text-[#58A6FF]">{item.name}</h4>
+              <p className="text-base md:text-lg">{item.value}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="bg-[#21262D] px-4 md:px-6 py-12">
+        <h3 className="text-2xl font-bold mb-8 text-center text-[#F9D342]">{t.features}</h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+          <div>
+            <div className="text-4xl mb-4">🏦</div>
+            <h4 className="font-semibold mb-2 text-[#58A6FF]">{t.feature1}</h4>
+            <p>{t.feature1desc}</p>
+          </div>
+          <div>
+            <div className="text-4xl mb-4">📈</div>
+            <h4 className="font-semibold mb-2 text-[#58A6FF]">{t.feature2}</h4>
+            <p>{t.feature2desc}</p>
+          </div>
+          <div>
+            <div className="text-4xl mb-4">✅</div>
+            <h4 className="font-semibold mb-2 text-[#58A6FF]">{t.feature3}</h4>
+            <p>{t.feature3desc}</p>
+          </div>
+        </div>
+      </section>
+
+      <footer className="bg-[#0D1117] text-center py-6 text-gray-500 text-sm">
+        © 2025 {t.title}. {t.copyright}。
+      </footer>
+    </div>
+  );
+}
